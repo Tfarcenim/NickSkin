@@ -1,5 +1,14 @@
 package tfar.nickskin.platform.services;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
+import tfar.nickskin.attachments.CommonDataAttachment;
+
 public interface IPlatformHelper {
 
     /**
@@ -33,4 +42,25 @@ public interface IPlatformHelper {
 
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    <T> void registerDataAttachment(CommonDataAttachment<T> attachment);
+
+    @Nullable
+    <T> T getAttachedValue(Object object, CommonDataAttachment<T> attachment);
+
+    default <T> T getOrCreateAttachedValue(Entity entity, CommonDataAttachment<T> attachment) {
+        T value = getAttachedValue(entity, attachment);
+        if (value != null) {
+            return value;
+        }
+        value = attachment.getDefaultValueSupplier().apply(entity);
+        setAttachedValue(entity, attachment, value);
+        return value;
+    }
+
+    <T> void setAttachedValue(Object object, CommonDataAttachment<T> attachment, @Nullable T value);
+
+    void refreshDisplayName(Player player);
+
+    ServerPlayer getFakePlayer(ServerLevel level, GameProfile gameProfile);
 }

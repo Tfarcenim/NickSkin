@@ -1,10 +1,9 @@
 package tfar.nickskin;
 
+import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tfar.nickskin.platform.Services;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.Items;
+import tfar.nickskin.attachments.CommonDataAttachments;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -22,4 +21,17 @@ public class NickSkin {
     public static void init() {
 
     }
+
+    public static void registration() {
+        CommonDataAttachments.init();
+        NickSkinGameRules.init();
+    }
+
+    public static NickSkinData nickSkinData;
+
+    public static void serverStarted(MinecraftServer server) {
+        nickSkinData = server.overworld().getDataStorage().computeIfAbsent(NickSkinData.factory(server.overworld()),MOD_ID);
+    }
+
+
 }
