@@ -14,6 +14,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.jetbrains.annotations.Nullable;
 import tfar.nickskin.attachments.AttachmentHelper;
@@ -26,15 +27,19 @@ public class NickSkinCommands {
         dispatcher.register((Commands.literal("nick").executes(NickSkinCommands::resetOwnNickname))
                 .then(Commands.argument("nickname", StringArgumentType.greedyString()).executes(NickSkinCommands::setNickname)));
 
+        dispatcher.register((Commands.literal("nickskin").executes(NickSkinCommands::resetOwnSkin))
+                .then(Commands.argument("skin", GameProfileArgument.gameProfile())
+                        .executes(NickSkinCommands::setSkin)));
+
         dispatcher.register((Commands.literal("unnick")
                 .executes(NickSkinCommands::resetOwnNickname)).then((Commands.literal("players")
                 .requires((src) -> src.hasPermission(Commands.LEVEL_ADMINS)))
                 .then(Commands.argument("players", GameProfileArgument.gameProfile())
-                        .executes(NickSkinCommands::resetByUsername))));
+                        .executes(NickSkinCommands::resetByGameProfile))));
 
     }
 
-    private static int resetByUsername(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private static int resetByGameProfile(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         Collection<GameProfile> gameProfiles = GameProfileArgument.getGameProfiles(context,"players");
 
@@ -57,7 +62,7 @@ public class NickSkinCommands {
         return 1;
     }
 
-    private static int randomNickSelf(CommandContext<CommandSourceStack> context) {
+    private static int randomNicknameSelf(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayer();
         if (randomNickPlayer(player)) {
@@ -122,6 +127,14 @@ public class NickSkinCommands {
         return 1;
     }
 
+    private static int resetOwnSkin(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = source.getPlayerOrException();
+        AttachmentHelper.clearSkin(player);
+        source.sendSuccess(() -> TextComponents.CLEAR_SKIN, true);
+        return 1;
+    }
+
     private static int setNickname(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayerOrException();
@@ -133,6 +146,31 @@ public class NickSkinCommands {
             NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetNickname(player, nickname);
             if (problem == null) {
                 MutableComponent success = TextComponents.setNickName(nickname);
+                source.sendSuccess(() -> success, true);
+                return 1;
+            } else {
+                source.sendFailure(problem.error.get());
+                return 0;
+            }
+        }
+    }
+
+    private static int setSkin(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = source.getPlayerOrException();
+        Collection<GameProfile> skins = GameProfileArgument.getGameProfiles(context, "skin");
+        if (skins.size()!= 1) {
+            return 0;
+        }
+        GameProfile skin = skins.iterator().next();
+        ResolvableProfile currentSkin = AttachmentHelper.getSkin(player);
+        if (skin.equals(currentSkin)) {
+            source.sendFailure(TextComponents.SKIN_ALREADY_SET);
+            return 0;
+        } else {
+            NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetSkin(player, skin);
+            if (problem == null) {
+                MutableComponent success = TextComponents.setSkin(skin);
                 source.sendSuccess(() -> success, true);
                 return 1;
             } else {

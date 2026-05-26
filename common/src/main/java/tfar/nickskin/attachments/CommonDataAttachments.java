@@ -3,6 +3,7 @@ package tfar.nickskin.attachments;
 import com.mojang.serialization.Codec;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.component.ResolvableProfile;
 import tfar.nickskin.platform.Services;
 
 import java.util.HashMap;
@@ -19,6 +20,12 @@ public class CommonDataAttachments {
                     .codec(Codec.STRING)
                     .networkSynchronized(ByteBufCodecs.STRING_UTF8)
                     .build("nickname"));
+
+    public static final CommonDataAttachment<ResolvableProfile> SKIN = register(CommonDataAttachment.create(o -> (ResolvableProfile)null)
+            .codec(ResolvableProfile.CODEC)
+            .networkSynchronized(ResolvableProfile.STREAM_CODEC)
+            .build("skin")
+    );
 
     public static CommonDataAttachment<?> lookup(ResourceLocation location) {
         return MAP.get(location);

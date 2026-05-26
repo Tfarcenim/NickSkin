@@ -17,9 +17,11 @@ public class NickSkinConfig {
     }
 
     public final ModConfigSpec.ConfigValue<List<? extends String>> nicknames;
+    public final ModConfigSpec.ConfigValue<List<? extends String>> skins;
     public NickSkinConfig(ModConfigSpec.Builder builder) {
         builder.push("general");
         nicknames = builder.defineList("random_nicknames",() -> createDefaultList(),o -> true);
+        skins = builder.defineList("random_skins",() -> createDefaultList(),o -> true);
         builder.pop();
     }
 

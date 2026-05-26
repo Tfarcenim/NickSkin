@@ -1,21 +1,28 @@
 package tfar.nickskin;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.MinecraftServer;
 
 public interface TextComponents {
 
     static MutableComponent setNickName(String nickname) {
         return Component.translatable("nickskin.commands.set_nickname.success",nickname);
     }
+
+    static MutableComponent setSkin(GameProfile nickname) {
+        return Component.translatable("nickskin.commands.set_skin.success",nickname);
+    }
+
     MutableComponent CLEAR_NICKNAME = Component.translatable("nickskin.commands.clear_nickname.success");
+    MutableComponent CLEAR_SKIN = Component.translatable("nickskin.commands.clear_skin.success");
 
     static MutableComponent listNicknamedUsers(String nickname) {
         return Component.translatable("nickskin.commands.list_nicknames.success",nickname);
     }
 
     MutableComponent NICKNAME_ALREADY_SET =Component.translatable("nickskin.commands.nickname_already_set.failure");
+    MutableComponent SKIN_ALREADY_SET =Component.translatable("nickskin.commands.skin_already_set.failure");
 
     static MutableComponent nicknameTooLong(int maxLength) {
         return Component.translatable("nickskin.commands.nickname_too_long.failure",maxLength);
