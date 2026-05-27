@@ -2,6 +2,7 @@ package tfar.nickskin.attachments;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.jetbrains.annotations.Nullable;
 import tfar.nickskin.NickSkin;
 import tfar.nickskin.platform.Services;
@@ -26,12 +27,14 @@ public class AttachmentHelper {
 
 
     public static void setSkin(Player player, @Nullable ResolvableProfile skin) {
+        if (skin != null && !skin.isResolved()) {
+            skin.resolve().thenAcceptAsync(profile -> setSkin(player, profile), SkullBlockEntity.CHECKED_MAIN_THREAD_EXECUTOR);
+        }
         Services.PLATFORM.setAttachedValue(player,CommonDataAttachments.SKIN,skin);
-
     }
 
     public static ResolvableProfile getSkin(Player player) {
-        return Services.PLATFORM.getAttachedValue(player,CommonDataAttachments.SKIN);
+        return Services.PLATFORM.getAttachedValue(player, CommonDataAttachments.SKIN);
     }
 
     public static void clearSkin(Player player) {

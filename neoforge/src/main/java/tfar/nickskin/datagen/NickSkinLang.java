@@ -18,7 +18,7 @@ public class NickSkinLang extends LanguageProvider {
     @Override
     protected void addTranslations() {
         addTranslatableComponent(TextComponents.setNickName(""),"Your nickname was set to \"%s\"");
-        addTranslatableComponent(TextComponents.setSkin(new GameProfile(Util.NIL_UUID,"")),"Your skin was set to \"%s\"");
+        addTranslatableComponent(TextComponents.setSkin(""),"Your skin was set to \"%s\"");
         addTranslatableComponent(TextComponents.setRandomNickName(""),"Your nickname was randomly set to \"%s\"");
         addTranslatableComponent(TextComponents.CLEAR_NICKNAME,"Your nickname was cleared");
         addTranslatableComponent(TextComponents.CLEAR_SKIN,"Your skin was cleared");

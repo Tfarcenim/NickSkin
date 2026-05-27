@@ -19,12 +19,21 @@ public class CommonDataAttachments {
             register(CommonDataAttachment.create(o -> (String)null)
                     .codec(Codec.STRING)
                     .networkSynchronized(ByteBufCodecs.STRING_UTF8)
+                    .copyOnDeath()
                     .build("nickname"));
 
     public static final CommonDataAttachment<ResolvableProfile> SKIN = register(CommonDataAttachment.create(o -> (ResolvableProfile)null)
             .codec(ResolvableProfile.CODEC)
             .networkSynchronized(ResolvableProfile.STREAM_CODEC)
+            .copyOnDeath()
             .build("skin")
+    );
+
+    public static final CommonDataAttachment<Boolean> PREVENT_DEATH = register(CommonDataAttachment.create(o -> false)
+            .codec(Codec.BOOL)
+            .networkSynchronized(ByteBufCodecs.BOOL)
+            .copyOnDeath()
+            .build("prevent_death")
     );
 
     public static CommonDataAttachment<?> lookup(ResourceLocation location) {

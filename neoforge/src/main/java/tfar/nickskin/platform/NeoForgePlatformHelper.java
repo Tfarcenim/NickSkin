@@ -15,6 +15,7 @@ import tfar.nickskin.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
@@ -41,7 +42,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     public <T> void registerDataAttachment(CommonDataAttachment<T> attachment) {
         AttachmentType.Builder<T> builder = AttachmentType.builder((Function<IAttachmentHolder, T>) (Object) attachment.getDefaultValueSupplier());
         if (attachment.getCodec() != null) {
-            builder.serialize(attachment.getCodec());
+            builder.serialize(attachment.getCodec(), Objects::nonNull);//don't try to save null attachments
         }
         if (attachment.isCopyOnDeath()) {
             builder.copyOnDeath();
@@ -60,7 +61,12 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     public <T> T getAttachedValue(Object object, CommonDataAttachment<T> attachment) {
         AttachmentType<T> type = (AttachmentType<T>) attachment.getAttachment();
         if (object instanceof IAttachmentHolder attachmentHolder) {
-            return attachmentHolder.getData(type);
+
+            if (attachmentHolder.hasData(type)) {//get data attempts to create it
+                return attachmentHolder.getData(type);
+            } else {
+                return null;
+            }
         } else {
             throw new IllegalStateException("Cannot attach data to " + object);
         }

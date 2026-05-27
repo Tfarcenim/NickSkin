@@ -1,6 +1,5 @@
 package tfar.nickskin;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -10,8 +9,8 @@ public interface TextComponents {
         return Component.translatable("nickskin.commands.set_nickname.success",nickname);
     }
 
-    static MutableComponent setSkin(GameProfile nickname) {
-        return Component.translatable("nickskin.commands.set_skin.success",nickname);
+    static MutableComponent setSkin(String skin) {
+        return Component.translatable("nickskin.commands.set_skin.success",skin);
     }
 
     MutableComponent CLEAR_NICKNAME = Component.translatable("nickskin.commands.clear_nickname.success");

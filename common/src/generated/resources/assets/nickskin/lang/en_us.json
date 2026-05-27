@@ -2,6 +2,7 @@
   "nickskin.command.random_nickname.failure": "Couldn't set random nickname",
   "nickskin.command.random_nickname.succsss": "Successfully set random nickname",
   "nickskin.commands.clear_nickname.success": "Your nickname was cleared",
+  "nickskin.commands.clear_skin.success": "Your skin was cleared",
   "nickskin.commands.invalid_nickname.failure": "Invalid nickname",
   "nickskin.commands.list_nicknames.success": "Nicknamed users: %s",
   "nickskin.commands.nickname_already_set.failure": "Nickname already set",
@@ -9,5 +10,7 @@
   "nickskin.commands.nickname_matches_player_name.failure": "Nickname matches player name",
   "nickskin.commands.nickname_too_long.failure": "Nickname too long",
   "nickskin.commands.set_nickname.success": "Your nickname was set to \"%s\"",
-  "nickskin.commands.set_random_nickname.success": "Your nickname was randomly set to \"%s\""
+  "nickskin.commands.set_random_nickname.success": "Your nickname was randomly set to \"%s\"",
+  "nickskin.commands.set_skin.success": "Your skin was set to \"%s\"",
+  "nickskin.commands.skin_already_set.failure": "Skin already set"
 }

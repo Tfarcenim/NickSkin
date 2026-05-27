@@ -1,6 +1,7 @@
 package tfar.nickskin;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,15 +9,17 @@ import net.minecraft.world.item.component.ResolvableProfile;
 import org.jetbrains.annotations.Nullable;
 import tfar.nickskin.attachments.AttachmentHelper;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class NicknamePicker {
 
-    public static @Nullable Problem trySetSkin(ServerPlayer player, GameProfile skin) {
+    public static @Nullable Problem trySetSkin(ServerPlayer player, String skin, boolean fromAdmin) {
         Problem problem = getSkinProblem(player.server, skin);
         if (problem != null) return problem;
-        AttachmentHelper.setSkin(player, new ResolvableProfile(skin));
+        AttachmentHelper.setSkin(player, new ResolvableProfile(Optional.of(skin.getName()),Optional.empty(),new PropertyMap()));
         return null;
     }
 
@@ -79,19 +82,20 @@ public class NicknamePicker {
     }
 
     public static String getRandomSkin(MinecraftServer server) {
-        List<? extends String> names = NickSkinConfig.CONFIG.skins.get();
+        List<? extends String> names = new ArrayList<>();//NickSkinConfig.CONFIG.skins.get();
         String name = names.get(server.overworld().random.nextInt(names.size()));
         return name;
     }
 
     @Nullable
-    public static Problem trySetNickname(ServerPlayer player, String nickname) {
-        Problem availabilityCode = getNicknameProblem(player.server,nickname);
-        if (availabilityCode != null) {
-            return availabilityCode;
-        } else {
-            AttachmentHelper.setNickName(player, nickname);
-            return null;
+    public static Problem trySetNickname(ServerPlayer player, String nickname,boolean fromAdmin) {
+        if (!fromAdmin) {
+            Problem problem = getNicknameProblem(player.server, nickname);
+            if (problem != null) {
+                return problem;
+            }
         }
+        AttachmentHelper.setNickName(player, nickname);
+        return null;
     }
 }
