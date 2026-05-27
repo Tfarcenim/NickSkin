@@ -61,6 +61,7 @@ public interface IPlatformHelper {
     <T> void setAttachedValue(Object object, CommonDataAttachment<T> attachment, @Nullable T value);
 
     void refreshDisplayName(Player player);
+    void refreshTabNameList(Player player);
 
     ServerPlayer getFakePlayer(ServerLevel level, GameProfile gameProfile);
 }

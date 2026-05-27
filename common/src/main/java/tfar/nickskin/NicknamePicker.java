@@ -1,6 +1,5 @@
 package tfar.nickskin;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -17,9 +16,11 @@ import java.util.function.Supplier;
 public class NicknamePicker {
 
     public static @Nullable Problem trySetSkin(ServerPlayer player, String skin, boolean fromAdmin) {
-        Problem problem = getSkinProblem(player.server, skin);
-        if (problem != null) return problem;
-        AttachmentHelper.setSkin(player, new ResolvableProfile(Optional.of(skin.getName()),Optional.empty(),new PropertyMap()));
+        if (!fromAdmin) {
+            Problem problem = getSkinProblem(player.server, skin);
+            if (problem != null) return problem;
+        }
+        AttachmentHelper.setSkin(player, new ResolvableProfile(Optional.of(skin),Optional.empty(),new PropertyMap()));
         return null;
     }
 
@@ -36,7 +37,7 @@ public class NicknamePicker {
     }
 
     @Nullable
-    public static Problem getSkinProblem(MinecraftServer server, GameProfile nickname) {
+    public static Problem getSkinProblem(MinecraftServer server, String nickname) {
         return null;
     }
 

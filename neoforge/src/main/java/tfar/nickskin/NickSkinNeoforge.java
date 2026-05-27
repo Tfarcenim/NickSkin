@@ -27,6 +27,7 @@ public class NickSkinNeoforge {
         NeoForge.EVENT_BUS.addListener(this::commands);
         NeoForge.EVENT_BUS.addListener(this::serverStarted);
         NeoForge.EVENT_BUS.addListener(this::tabList);
+        NeoForge.EVENT_BUS.addListener(this::nameFormat);
         // This method is invoked by the NeoForge mod loader when it is ready
         // to load your mod. You can access NeoForge and Common code in this
         // project.
@@ -34,6 +35,14 @@ public class NickSkinNeoforge {
         // Use NeoForge to bootstrap the Common mod.
         NickSkin.init();
 
+    }
+
+    void nameFormat(PlayerEvent.NameFormat event) {
+        Player player = event.getEntity();
+        String nickname = AttachmentHelper.getNickName(player);
+        if (nickname != null) {
+            event.setDisplayname(Component.literal(nickname));
+        }
     }
 
     void tabList(PlayerEvent.TabListNameFormat event) {

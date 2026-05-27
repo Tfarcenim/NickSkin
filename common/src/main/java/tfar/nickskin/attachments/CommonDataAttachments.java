@@ -2,7 +2,9 @@ package tfar.nickskin.attachments;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.component.ResolvableProfile;
 import tfar.nickskin.platform.Services;
 
@@ -29,9 +31,9 @@ public class CommonDataAttachments {
             .build("skin")
     );
 
-    public static final CommonDataAttachment<Boolean> PREVENT_DEATH = register(CommonDataAttachment.create(o -> false)
-            .codec(Codec.BOOL)
-            .networkSynchronized(ByteBufCodecs.BOOL)
+    public static final CommonDataAttachment<Unit> PREVENT_DEATH = register(CommonDataAttachment.create(o -> (Unit)null)
+            .codec(Unit.CODEC)
+            .networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
             .copyOnDeath()
             .build("prevent_death")
     );

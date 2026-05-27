@@ -62,7 +62,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
         AttachmentType<T> type = (AttachmentType<T>) attachment.getAttachment();
         if (object instanceof IAttachmentHolder attachmentHolder) {
 
-            if (attachmentHolder.hasData(type)) {//get data attempts to create it
+            if (attachmentHolder.hasData(type) || attachment.getDefaultValueSupplier().apply(object) != null) {//get data attempts to create it
                 return attachmentHolder.getData(type);
             } else {
                 return null;
@@ -90,6 +90,13 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public void refreshDisplayName(Player player) {
         player.refreshDisplayName();
+    }
+
+    @Override
+    public void refreshTabNameList(Player player) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.refreshTabListName();
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package tfar.nickskin.mixin;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -11,7 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import tfar.nickskin.NickSkinGameRules;
+import tfar.nickskin.attachments.AttachmentHelper;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -28,7 +29,7 @@ public abstract class LivingEntityMixin extends Entity {
         if (cir.getReturnValue())return;
         MinecraftServer server = getServer();
         if (server != null)  {
-            boolean preventDeath = server.getGameRules().getBoolean(NickSkinGameRules.PREVENT_DEATH);
+            boolean preventDeath = (Object)this instanceof ServerPlayer player && AttachmentHelper.getShouldPreventDeath(player);
             if (preventDeath) {
                 setHealth(1);
                 cir.setReturnValue(true);

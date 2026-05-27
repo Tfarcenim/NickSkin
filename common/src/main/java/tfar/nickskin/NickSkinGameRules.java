@@ -18,11 +18,6 @@ public class NickSkinGameRules {
             GameRules.BooleanValue.create(false)
     );
 
-    public static final GameRules.Key<GameRules.BooleanValue> PREVENT_DEATH = GameRules.register(
-            "nickskin:prevent_death", GameRules.Category.PLAYER,
-            GameRules.BooleanValue.create(false)
-    );
-
     public static void init(){
 
     }

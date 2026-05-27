@@ -1,5 +1,7 @@
 package tfar.nickskin.attachments;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -13,6 +15,7 @@ public class AttachmentHelper {
         Services.PLATFORM.setAttachedValue(player,CommonDataAttachments.NICKNAME,nickname);
         if (!player.level().isClientSide()) {
             Services.PLATFORM.refreshDisplayName(player);
+            Services.PLATFORM.refreshTabNameList(player);
             NickSkin.nickSkinData.update(player,nickname);
         }
     }
@@ -35,6 +38,14 @@ public class AttachmentHelper {
 
     public static ResolvableProfile getSkin(Player player) {
         return Services.PLATFORM.getAttachedValue(player, CommonDataAttachments.SKIN);
+    }
+
+    public static void setShouldPreventDeath(ServerPlayer player, boolean preventDeath) {
+        Services.PLATFORM.setAttachedValue(player,CommonDataAttachments.PREVENT_DEATH,preventDeath ? Unit.INSTANCE : null);
+    }
+
+    public static boolean getShouldPreventDeath(ServerPlayer player) {
+        return Services.PLATFORM.getAttachedValue(player,CommonDataAttachments.PREVENT_DEATH) != null;
     }
 
     public static void clearSkin(Player player) {

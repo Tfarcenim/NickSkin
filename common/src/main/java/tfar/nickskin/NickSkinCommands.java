@@ -3,6 +3,7 @@ package tfar.nickskin;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -29,7 +30,7 @@ public class NickSkinCommands {
         dispatcher.register(Commands.literal("nick")
                 .then(Commands.argument("nickname", StringArgumentType.greedyString())
                         .executes(NickSkinCommands::setOwnNickname)
-                        .then(Commands.literal("player")
+                        .then(Commands.literal("set")
                                 .requires(cs -> cs.hasPermission(Commands.LEVEL_ADMINS))
                                 .then(Commands.argument("player", EntityArgument.player())
                                         .then(Commands.argument("name", StringArgumentType.greedyString())
@@ -43,7 +44,7 @@ public class NickSkinCommands {
         dispatcher.register(Commands.literal("nickskin")
                 .then(Commands.argument("skin", StringArgumentType.string())
                         .executes(NickSkinCommands::setOwnSkin))
-                .then(Commands.literal("player")
+                .then(Commands.literal("set")
                         .requires(cs -> cs.hasPermission(Commands.LEVEL_ADMINS))
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("skin", StringArgumentType.string())
@@ -54,28 +55,43 @@ public class NickSkinCommands {
         );
 
         dispatcher.register(Commands.literal("unnick")
-                .executes(NickSkinCommands::resetOwnNickname).then(Commands.literal("players")
-                .requires(src -> src.hasPermission(Commands.LEVEL_ADMINS))
-                .then(Commands.argument("players", GameProfileArgument.gameProfile())
-                        .executes(NickSkinCommands::resetNicknameByGameProfile))));
+                .executes(NickSkinCommands::resetOwnNickname).then(Commands.literal("remove")
+                        .requires(src -> src.hasPermission(Commands.LEVEL_ADMINS))
+                        .then(Commands.argument("players", GameProfileArgument.gameProfile())
+                                .executes(NickSkinCommands::resetNicknameByGameProfile))));
 
         dispatcher.register(Commands.literal("unnickskin")
-                .executes(NickSkinCommands::resetOwnSkin).then(Commands.literal("players")
-                .requires(src -> src.hasPermission(Commands.LEVEL_ADMINS))
-                .then(Commands.argument("players", GameProfileArgument.gameProfile())
-                        .executes(NickSkinCommands::resetSkinByGameProfile))));
+                .executes(NickSkinCommands::resetOwnSkin).then(Commands.literal("remove")
+                        .requires(src -> src.hasPermission(Commands.LEVEL_ADMINS))
+                        .then(Commands.argument("players", GameProfileArgument.gameProfile())
+                                .executes(NickSkinCommands::resetSkinByGameProfile))));
 
         dispatcher.register(Commands.literal("nickrandom").executes(NickSkinCommands::randomNicknameSelf)
-                .then(Commands.literal("players")
+                .then(Commands.literal("set")
+                        .requires(cs -> cs.hasPermission(Commands.LEVEL_ADMINS))
                         .then(Commands.argument("players", EntityArgument.players())
-                                .requires(cs -> cs.hasPermission(Commands.LEVEL_ADMINS))
-                                .then(Commands.argument("name", StringArgumentType.greedyString())
-                                        .executes(NickSkinCommands::randomNickPlayers)
-                                )
+                                .executes(NickSkinCommands::randomNickPlayers)
                         )
                 )
         );
-        dispatcher.register(Commands.literal("prevent_death"));
+        dispatcher.register(Commands.literal("prevent_death")
+                .requires(cs -> cs.hasPermission(Commands.LEVEL_ADMINS))
+                .then(Commands.argument("prevent_death", BoolArgumentType.bool())
+                        .then(Commands.argument("players", EntityArgument.players())
+                                .executes(NickSkinCommands::preventDeath)
+                        )
+                )
+        );
+    }
+
+    private static int preventDeath(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        CommandSourceStack source = ctx.getSource();
+        boolean preventDeath = BoolArgumentType.getBool(ctx, "prevent_death");
+        Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx,"players");
+        for (ServerPlayer player : players) {
+            AttachmentHelper.setShouldPreventDeath(player, preventDeath);
+        }
+        return 0;
     }
 
     private static int resetNicknameByGameProfile(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -162,10 +178,10 @@ public class NickSkinCommands {
 
         for (int i = 0; i < maxAttempts; ++i) {
             String randomNickname = NicknamePicker.getRandomNickname(target.server);
-            NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetNickname(target, randomNickname,false);
+            NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetNickname(target, randomNickname, false);
             if (problem == null) {
                 target.sendSystemMessage(TextComponents.setRandomNickName(randomNickname), false);
-                AttachmentHelper.setSkin(target,new ResolvableProfile(Optional.of(randomNickname),Optional.empty(),new PropertyMap()));
+                AttachmentHelper.setSkin(target, new ResolvableProfile(Optional.of(randomNickname), Optional.empty(), new PropertyMap()));
                 return true;
             }
         }
@@ -204,15 +220,15 @@ public class NickSkinCommands {
         ServerPlayer player = source.getPlayerOrException();
         String nickname = StringArgumentType.getString(context, "nickname");
 
-        return setNickName(source,player,nickname,false);
+        return setNickName(source, player, nickname, false);
     }
 
-    private static int setNickName(CommandSourceStack source,ServerPlayer target, String nickname,boolean fromAdmin) {
+    private static int setNickName(CommandSourceStack source, ServerPlayer target, String nickname, boolean fromAdmin) {
         if (nickname.equals(AttachmentHelper.getNickName(target))) {
             source.sendFailure(TextComponents.NICKNAME_ALREADY_SET);
             return 0;
         } else {
-            NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetNickname(target, nickname,fromAdmin);
+            NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetNickname(target, nickname, fromAdmin);
             if (problem == null) {
                 MutableComponent success = TextComponents.setNickName(nickname);
                 source.sendSuccess(() -> success, true);
@@ -228,23 +244,23 @@ public class NickSkinCommands {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = EntityArgument.getPlayer(context, "player");
         String nickname = StringArgumentType.getString(context, "nickname");
-        return setNickName(source,player,nickname,true);
+        return setNickName(source, player, nickname, true);
     }
 
     private static int setOwnSkin(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayerOrException();
         String skin = StringArgumentType.getString(context, "skin");
-        return setSkin(source,player,skin,false);
+        return setSkin(source, player, skin, false);
     }
 
-    private static int setSkin(CommandSourceStack source,ServerPlayer player,String skin,boolean fromAdmin) {
+    private static int setSkin(CommandSourceStack source, ServerPlayer player, String skin, boolean fromAdmin) {
         ResolvableProfile currentSkin = AttachmentHelper.getSkin(player);
         if (currentSkin.name().isPresent() && currentSkin.name().get().equals(skin)) {
             source.sendFailure(TextComponents.SKIN_ALREADY_SET);
             return 0;
         } else {
-            NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetSkin(player, skin,fromAdmin);
+            NicknamePicker.@Nullable Problem problem = NicknamePicker.trySetSkin(player, skin, fromAdmin);
             if (problem == null) {
                 MutableComponent success = TextComponents.setSkin(skin);
                 source.sendSuccess(() -> success, true);
@@ -260,6 +276,6 @@ public class NickSkinCommands {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = EntityArgument.getPlayer(context, "player");
         String skin = StringArgumentType.getString(context, "skin");
-        return setSkin(source,player,skin,true);
+        return setSkin(source, player, skin, true);
     }
 }
